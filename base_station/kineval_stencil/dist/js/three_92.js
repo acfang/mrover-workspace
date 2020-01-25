@@ -11105,6 +11105,22 @@
 
 		},
 
+		setAttribute: function ( name, attribute ) {
+
+			this.attributes[ name ] = attribute;
+	
+			return this;
+	
+		},
+	
+		deleteAttribute: function ( name ) {
+	
+			delete this.attributes[ name ];
+	
+			return this;
+	
+		},
+
 		removeAttribute: function ( name ) {
 
 			delete this.attributes[ name ];

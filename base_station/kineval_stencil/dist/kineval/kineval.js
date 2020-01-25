@@ -670,7 +670,7 @@ kineval.initScene = function initScene() {
 
     // instantiate threejs renderer and its dimensions
     // THREE r62 renderer = new THREE.WebGLRenderer();
-    //renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer = new THREE.WebGLRenderer({antialias: true});
     renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
     renderer.setClearColor(0x00234c,1); // blue
     renderer.setClearColor(0xffc90b,1); // maize
@@ -683,7 +683,10 @@ kineval.initScene = function initScene() {
 
     // instantiate threejs camera controls
     camera_controls = new THREE.OrbitControls( camera );
-    camera_controls.addEventListener( 'change', renderer );
+    camera_controls.addEventListener( 'change', render );
+    function render() {
+        renderer.render( scene, camera );
+    }
 
     // create world floor
     // KE T creates error : "TypeError: n.x is undefined"
@@ -797,6 +800,33 @@ kineval.initScene = function initScene() {
     sphereInter = new THREE.Mesh( geometry, material );
     sphereInter.visible = false;
     scene.add( sphereInter );
+
+    // instantiate a loader
+    var loader = new THREE.PCDLoader();
+
+    // load a resource
+    loader.load(
+	    // resource URL
+	    "surroundings.pcd",
+	    // called when the resource is loaded
+	    function ( mesh ) {
+
+		    scene.add( mesh );
+
+	    },
+	    // called when loading is in progresses
+	    function ( xhr ) {
+
+		    console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+
+	    },
+	    // called when loading has errors
+	    function ( error ) {
+
+		    console.log( error );
+
+	    }
+    );
 }
 
 kineval.initGUIDisplay = function initGUIDisplay () {

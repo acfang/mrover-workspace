@@ -26,6 +26,8 @@ def main():
 
     run_coroutines(lcm_.loop(), arm.execute_spline())
 
+    os.system("python image_capture.py")
+
 
 if __name__ == "__main__":
     main()
