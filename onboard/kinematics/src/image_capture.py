@@ -57,7 +57,7 @@ def main():
         sl.savePointCloudAs(zed, sl.POINT_CLOUD_FORMAT_PCD_ASCII,
                             "surroundings.pcd", False)
         subprocess.run(["scp", "surroundings.pcd",
-                       "mrover@10.0.0.1:base_station/kineval_stencil/dist"])
+                       "mrover@10.0.0.2:base_station/kineval_stencil/dist"])
 
     print("ready to close")
 
