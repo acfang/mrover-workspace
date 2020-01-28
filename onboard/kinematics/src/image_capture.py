@@ -18,8 +18,12 @@
 #
 ########################################################################
 
+# TODO: function saveMatPointCloudAs / savePointCloudAs doesn't exist in pyzed.sl
+#       but exists in zed-python-api/pyzed/Utils.cpp and sl.cpp
+
 import pyzed.sl as sl
 import subprocess
+import time
 
 
 def main():
@@ -43,6 +47,8 @@ def main():
 
     print("camera opened")
 
+    time.sleep(5)
+
     # Capture one frame and stop
     image = sl.Mat()
     runtime_parameters = sl.RuntimeParameters()
@@ -54,8 +60,8 @@ def main():
         # Get the timestamp at the time the image was captured
         print("Image resolution: {0} x {1} || Image timestamp: {2}\n".format(
               image.get_width(), image.get_height(), timestamp))
-        sl.savePointCloudAs(zed, sl.POINT_CLOUD_FORMAT_PCD_ASCII,
-                            "surroundings.pcd", False)
+        print(sl.savePointCloudAs(zed, sl.POINT_CLOUD_FORMAT_PCD_ASCII,
+                            "surroundings.pcd", False))
         subprocess.run(["scp", "surroundings.pcd",
                        "mrover@10.0.0.2:base_station/kineval_stencil/dist"])
 
