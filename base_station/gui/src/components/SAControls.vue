@@ -1,16 +1,19 @@
 <template>
     <div class="wrap">
-        <div class="toggle_drill">
+        <!-- <div class="toggle_drill">
             <Checkbox ref="front_drill" v-bind:name="'Front Drill Active'" v-on:toggle="updateControlMode('front_drill', $event)" />
             <Checkbox ref="back_drill" v-bind:name="'Back Drill Active'" v-on:toggle="updateControlMode('back_drill', $event)" />
+        </div> -->
+        <div class="zero_encoders">
+          <button v-on:click='zeroEncoders()'>Zero Encoders</button>
         </div>
-        <div class="speed_limiter">
+        <!-- <div class="speed_limiter">
             <p>
                 Speed Limiter:
                 <span>{{ dampenDisplay }}%</span>
             </p>
-        </div>
-        <div class="mode_info">
+        </div> -->
+        <!-- <div class="mode_info">
             <div v-if="controlMode === 'arm'">
                 <p>arm</p>
             </div>
@@ -19,11 +22,14 @@
                 <span class="name">Front Drill</span>
                 <span v-bind:class="['led', saBackDrillColor]" />
                 <span class="name">Back Drill</span>
-                <!-- <span v-bind:class="['led', saFrontDroneColor]" />
+                <span v-bind:class="['led', saFrontDroneColor]" />
                 <span class="name">Front Drone</span>
                 <span v-bind:class="['led', saBackDroneColor]" />
-                <span class="name">Back Drone</span> -->
+                <span class="name">Back Drone</span>
             </template>
+        </div> -->
+        <div v-show='false' id="keyboard">
+            <input v-on:keyup="keymonitor">
         </div>
     </div>
 </template>
@@ -46,7 +52,24 @@ export default {
         // front_drone: 0,
         // back_drone: 0
       },
-      dampen: 0
+      dampen: 0,
+
+      keymonitor: (event) => {
+        const keyboardData = {
+          "type": "Keyboard",
+          "w": event.keyCode === 87,
+          "a": event.keyCode === 65,
+          "s": event.keyCode === 83,
+          "d": event.keyCode === 68,
+          "i": event.keyCode === 73,
+          "j": event.keyCode === 74,
+          "k": event.keyCode === 75,
+          "l": event.keyCode === 76,
+        }
+        
+        console.log(event.keyCode)
+        this.$parent.publish('/gimbal_control', keyboardData)
+      }
     }
   },
 
@@ -78,6 +101,7 @@ export default {
 
   beforeDestroy: function () {
     window.clearInterval(interval);
+    document.removeEventListener('keyup', this.keymonitor);
   },
 
   created: function () {
@@ -119,6 +143,8 @@ export default {
     const esc_0_on = new Toggle(false)
     const esc_1_on = new Toggle(false)
 
+    document.addEventListener('keyup', this.keymonitor)
+
     interval = window.setInterval(() => {
       const gamepads = navigator.getGamepads()
       for (let i = 0; i < 4; i++) {
@@ -159,22 +185,24 @@ export default {
               'y': gamepad.buttons[XBOX_CONFIG['y']]['pressed']
               //one of the buttoms to turn on drone motor, servos
             }
-            
-            // Can only toggle either front or back drill
-            let front_drill_input = this.controlMode === 'front_drill' && xboxData['right_bumper']
-            let back_drill_input = this.controlMode === 'back_drill' && xboxData['right_bumper']
 
-            const saMotorsData = {
-              'type': 'SAMotors',
-              'carriage': deadzone(xboxData['right_js_y'], 0.3),
-              'four_bar': xboxData['d_pad_left'] - xboxData['d_pad_right'],
-              'front_drill': front_drill_input,
-              'back_drill': back_drill_input,
-              'micro_x': deadzone(xboxData['left_js_x'], 0.3),
-              'micro_y': deadzone(xboxData['left_js_y'], 0.3),
-              'micro_z': xboxData['right_trigger'] - xboxData['left_trigger']
-            }
-            this.$parent.publish('/sa_motors', saMotorsData)
+            this.$parent.publish('/sa_control', xboxData)
+            
+            // // Can only toggle either front or back drill
+            // let front_drill_input = this.controlMode === 'front_drill' && xboxData['right_bumper']
+            // let back_drill_input = this.controlMode === 'back_drill' && xboxData['right_bumper']
+
+            // const saMotorsData = {
+            //   'type': 'SAMotors',
+            //   'carriage': deadzone(xboxData['right_js_y'], 0.3),
+            //   'four_bar': xboxData['d_pad_left'] - xboxData['d_pad_right'],
+            //   'front_drill': front_drill_input,
+            //   'back_drill': back_drill_input,
+            //   'micro_x': deadzone(xboxData['left_js_x'], 0.3),
+            //   'micro_y': deadzone(xboxData['left_js_y'], 0.3),
+            //   'micro_z': xboxData['right_trigger'] - xboxData['left_trigger']
+            // }
+            // this.$parent.publish('/sa_motors', saMotorsData)
 
             esc_0_on.new_reading(xboxData['x'])
             if (esc_0_on.toggle && esc_1_on.toggle) {
@@ -226,6 +254,10 @@ export default {
       } else {
         this.setControlMode('')
       }
+    },
+
+    zeroEncoders: function() {
+      this.$parent.publish('/sa_zero_trigger', {'type': 'Signal'})
     },
 
     ...mapMutations('controls', {
