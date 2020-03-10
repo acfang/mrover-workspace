@@ -36,9 +36,9 @@
       <WaypointEditor v-bind:odom="odom" />
     </div>
     <div class="box controls light-bg">
-      <ArmControls/>
-      <EncoderCounts/>
-      <DriveControls/>
+      <ArmControls class="arm light-bg" />
+      <EncoderCounts class="encoders light-bg" />
+      <DriveControls class="drive light-bg" />
     </div>
   </div>
 </template>
@@ -150,7 +150,8 @@ export default {
         {'topic': '/camera_servos', 'type': 'CameraServos'},
         {'topic': '/encoder', 'type': 'Encoder'},
         {'topic': '/nav_status', 'type': 'NavStatus'},
-        {'topic': '/debugMessage', 'type': 'DebugMessage'}
+        {'topic': '/debugMessage', 'type': 'DebugMessage'},
+        {'topic': '/drive_state_data', 'type': 'DriveStateData'}
       ]
     )
 
@@ -214,8 +215,8 @@ export default {
     display: grid;
     grid-gap: 10px;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 60px 3fr 1fr 2fr 70px 60px;
-    grid-template-areas: "header header" "map cameras" "map waypoints" "map waypoints" "controls waypoints" "odom waypoints";
+    grid-template-rows: 60px 3fr 1fr 1fr 60px;
+    grid-template-areas: "header header" "map cameras" "map waypoints" "controls waypoints" "odom waypoints";
     font-family: sans-serif;
     height: 98vh;
   }
@@ -321,7 +322,23 @@ export default {
     grid-area: controls;
     font-size: 1em;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: .75fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas:
+      "arm drive" 
+      "encoders drive";
+  }
+
+  .arm {
+    grid-area: arm;
+  }
+
+  .drive {
+    grid-area: drive;
+  }
+
+  .encoders {
+    grid-area: encoders;
   }
 
   ul#vitals li {
